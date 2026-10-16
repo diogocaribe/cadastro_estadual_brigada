@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block extra_style %}
+<style>
+    .auth {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        min-height: 100vh;
+    }
+
+    .auth-brand {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 40px;
+        padding: 40px 48px;
+        background: var(--brand-dark);
+        color: #fafaf9;
+        overflow: hidden;
+    }
+    .auth-brand::after {
+        content: "";
+        position: absolute;
+        right: -160px;
+        bottom: -160px;
+        width: 480px;
+        height: 480px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(180, 35, 24, 0.55), rgba(180, 35, 24, 0) 70%);
+        pointer-events: none;
+    }
+    .auth-brand .brand { color: #fff; font-size: 1rem; }
+    .auth-brand-copy { position: relative; z-index: 1; max-width: 440px; }
+    .auth-brand-copy h1 { font-size: clamp(1.75rem, 2.6vw, 2.375rem); font-weight: 700; letter-spacing: -0.02em; }
+    .auth-brand-copy p { margin-top: 14px; color: #d6d3d1; font-size: 1rem; }
+    .auth-features { position: relative; z-index: 1; display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; color: #d6d3d1; font-size: 0.9375rem; }
+    .auth-features li { display: flex; align-items: center; gap: 10px; }
+    .auth-features li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #f97066; }
+
+    .auth-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+    }
+    .auth-card { width: 100%; max-width: 400px; }
+    .auth-card-head { margin-bottom: 28px; }
+    .auth-card-head h2 { font-size: 1.625rem; font-weight: 700; letter-spacing: -0.02em; }
+    .auth-card-head p { margin-top: 6px; color: var(--muted); }
+    .auth-form { display: grid; gap: 18px; }
+    .auth-form .alert { margin-bottom: 2px; }
+    .auth-footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.9375rem; }
+    .auth-mobile-brand { display: none; margin-bottom: 32px; }
+
+    @media (max-width: 900px) {
+        .auth { grid-template-columns: 1fr; }
+        .auth-brand { display: none; }
+        .auth-main { align-items: flex-start; padding: 40px 16px; }
+        .auth-mobile-brand { display: inline-flex; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth">
+    <aside class="auth-brand">
+        <span class="brand">{% include "includes/brand_mark.html" %}Cadastro Estadual de Brigadas</span>
+        <div class="auth-brand-copy">
+            <h1>Brigadas do estado registradas e localizadas em um só lugar.</h1>
+            <p>Cadastre as brigadas, marque a localização no mapa e mantenha a lista de brigadistas atualizada.</p>
+        </div>
+        <ul class="auth-features">
+            <li>Localização georreferenciada</li>
+            <li>Lista de brigadistas por unidade</li>
+            <li>Acesso individual por usuário</li>
+        </ul>
+    </aside>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <span class="brand auth-mobile-brand">{% include "includes/brand_mark.html" %}Cadastro Estadual de Brigadas</span>
+            {% block card %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}

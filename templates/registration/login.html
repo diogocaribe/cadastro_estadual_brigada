@@ -1,135 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1d4ed8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .login-box {
-            background: rgba(255,255,255,0.96);
-            backdrop-filter: blur(6px);
-            padding: 36px 28px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
-            width: 100%;
-            max-width: 400px;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #0f172a;
-        }
-        .logo h2 {
-            margin: 0;
-            font-size: 28px;
-        }
-        .logo small {
-            display: block;
-            margin-top: 6px;
-            color: #475569;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        label {
-            display: block;
-            margin-top: 16px;
-            font-size: 14px;
-            color: #374151;
-            font-weight: 600;
-        }
-        input {
-            width: 100%;
-            padding: 12px 14px;
-            margin-top: 8px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 15px;
-            background: #f8fafc;
-        }
-        button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 20px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        .helper {
-            display: flex;
-            justify-content: center;
-            margin-top: 14px;
-        }
-        .helper a {
-            text-decoration: none;
-            color: #1d4ed8;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .secondary-btn {
-            display: block;
-            width: 100%;
-            margin-top: 12px;
-            padding: 12px;
-            text-align: center;
-            border-radius: 10px;
-            background: #e2e8f0;
-            color: #0f172a;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        .error {
-            color: #b91c1c;
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-box">
-        <div class="logo">
-            <h2>Cadastro Estadual</h2>
-            <small>Brigadas</small>
+{% extends "auth_base.html" %}
+
+{% block title %}Entrar · Cadastro Estadual de Brigadas{% endblock %}
+
+{% block card %}
+<div class="auth-card-head">
+    <h2>Entrar</h2>
+    <p>Acesse com seu usuário e senha.</p>
+</div>
+
+<form method="post" class="auth-form">
+    {% csrf_token %}
+
+    {% if form.errors %}
+        <div class="alert alert-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+            <p>Usuário ou senha inválidos.</p>
         </div>
+    {% endif %}
 
-        {% if form.errors %}
-            <div class="error">Usuário ou senha inválidos.</div>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-
-            <label for="id_username">Usuário</label>
-            {{ form.username }}
-
-            <label for="id_password">Senha</label>
-            {{ form.password }}
-
-            <button type="submit">Acessar</button>
-        </form>
-
-        <div class="helper">
-            <a href="{% url 'password_reset' %}">Esqueci a senha</a>
-        </div>
-
-        <a class="secondary-btn" href="{% url 'cadastro_usuario' %}">Criar usuário e senha</a>
+    <div class="field">
+        <label for="id_username">Usuário</label>
+        {{ form.username }}
     </div>
-</body>
-</html>
+
+    <div class="field">
+        <div class="field-label-row">
+            <label for="id_password">Senha</label>
+            <a href="{% url 'password_reset' %}" class="field-help">Esqueci a senha</a>
+        </div>
+        {{ form.password }}
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">Acessar</button>
+</form>
+
+<p class="auth-footer">Ainda não tem acesso? <a href="{% url 'cadastro_usuario' %}">Criar usuário e senha</a></p>
+{% endblock %}

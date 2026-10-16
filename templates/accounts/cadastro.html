@@ -1,88 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Usuário</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3f4f6;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .box {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            width: 400px;
-        }
-        h2 {
-            margin-top: 0;
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-top: 14px;
-            font-weight: 600;
-        }
-        input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px;
-            margin-top: 6px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 18px;
-            border: none;
-            border-radius: 8px;
-            background: #2563eb;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .errors {
-            color: #b91c1c;
-            margin-bottom: 10px;
-        }
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 14px;
-            color: #2563eb;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h2>Cadastro de Usuário</h2>
+{% extends "auth_base.html" %}
 
-        {% if form.errors %}
-            <div class="errors">
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
+{% block title %}Criar conta · Cadastro Estadual de Brigadas{% endblock %}
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Cadastrar</button>
-        </form>
+{% block card %}
+<div class="auth-card-head">
+    <h2>Criar conta</h2>
+    <p>Defina seu usuário e senha de acesso.</p>
+</div>
 
-        <a href="{% url 'login' %}">Já tenho conta</a>
-    </div>
-</body>
-</html>
+<form method="post" class="auth-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+            <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+        </div>
+    {% endif %}
+
+    {% for field in form %}
+        <div class="field{% if field.errors %} has-error{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}
+                <p class="field-error">{{ error }}</p>
+            {% endfor %}
+            {% if field.help_text %}
+                <div class="field-help">{{ field.help_text|safe }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+</form>
+
+<p class="auth-footer">Já tem conta? <a href="{% url 'login' %}">Entrar</a></p>
+{% endblock %}
