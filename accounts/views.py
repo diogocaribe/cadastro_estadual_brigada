@@ -1,9 +1,17 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.http import FileResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.cache import cache_control
 
 from .forms import BrigadaForm, CadastroUsuarioForm
+from .geo import BAHIA_GEOJSON
+
+
+@cache_control(public=True, max_age=86400)
+def limite_bahia(request):
+    return FileResponse(BAHIA_GEOJSON.open('rb'), content_type='application/geo+json')
 
 
 @login_required

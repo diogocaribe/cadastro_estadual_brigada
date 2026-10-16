@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -38,3 +39,12 @@ class Brigada(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Perfil(models.Model):
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
+    nome_completo = models.CharField('Nome completo', max_length=200)
+    cpf = models.CharField('CPF', max_length=11, unique=True, help_text='Somente os 11 dígitos.')
+
+    def __str__(self):
+        return self.nome_completo

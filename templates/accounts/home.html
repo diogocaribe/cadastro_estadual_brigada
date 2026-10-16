@@ -101,6 +101,9 @@
     }
     .map-hint { display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; color: var(--subtle); }
     .map-hint svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .map-hint.is-error { color: var(--danger); font-weight: 500; }
+    /* Evita o retângulo de foco que o navegador desenha ao clicar num polígono. */
+    #map .leaflet-interactive:focus { outline: none; }
 
     /* Tabela de brigadistas */
     .count-badge {
@@ -269,7 +272,7 @@
                         <span class="step">1</span>
                         <div class="card-head-main">
                             <h2>Identificação</h2>
-                            <p>Nome e endereço da brigada.</p>
+                            <p>Nome, endereço e município da brigada.</p>
                         </div>
                     </header>
                     <div class="card-body">
@@ -283,9 +286,16 @@
                             {{ form.lotacao }}
                         </div>
 
-                        <div class="field{% if form.cep.errors %} has-error{% endif %}">
-                            <label for="id_cep">CEP <span class="optional">(opcional)</span></label>
-                            {{ form.cep }}
+                        <div class="fields-2">
+                            <div class="field{% if form.municipio.errors %} has-error{% endif %}">
+                                <label for="id_municipio">Município</label>
+                                {{ form.municipio }}
+                            </div>
+
+                            <div class="field{% if form.cep.errors %} has-error{% endif %}">
+                                <label for="id_cep">CEP <span class="optional">(opcional)</span></label>
+                                {{ form.cep }}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -300,16 +310,16 @@
                     </header>
                     <div class="card-body">
                         <div id="map" aria-label="Mapa com a localização da brigada"></div>
-                        <p class="map-hint">
+                        <p class="map-hint" id="map-hint" aria-live="polite">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>
-                            Clique no mapa ou arraste o marcador para definir a coordenada.
+                            <span>Clique no mapa ou arraste o marcador para definir a coordenada dentro da Bahia.</span>
                         </p>
                         <div class="fields-2">
-                            <div class="field{% if form.latitude.errors %} has-error{% endif %}">
+                            <div class="field{% if form.latitude.errors or form.non_field_errors %} has-error{% endif %}">
                                 <label for="id_latitude">Latitude</label>
                                 {{ form.latitude }}
                             </div>
-                            <div class="field{% if form.longitude.errors %} has-error{% endif %}">
+                            <div class="field{% if form.longitude.errors or form.non_field_errors %} has-error{% endif %}">
                                 <label for="id_longitude">Longitude</label>
                                 {{ form.longitude }}
                             </div>
@@ -369,43 +379,182 @@
     const map = L.map('map', {
         zoomControl: true,
         scrollWheelZoom: true,
-    }).setView(defaultCenter, 7);
+        minZoom: 5,
+    }).setView(defaultCenter, 6);
 
-    const baseLayer = L.tileLayer('https://a.tile.openstreetmap.de/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+    // A política de uso do OpenStreetMap exige o Referer, mas o Django envia
+    // "same-origin" por padrão; por isso a política é ajustada só para os tiles.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
-    });
-    baseLayer.addTo(map);
+        referrerPolicy: 'strict-origin-when-cross-origin',
+    }).addTo(map);
     L.control.scale({ metric: true, imperial: false }).addTo(map);
 
+    // Limites municipais (malha do IBGE). O clique no polígono continua
+    // chegando ao mapa, então posicionar o marcador funciona normalmente.
+    const IBGE_UF = 29; // Bahia
+    const municipioInput = document.getElementById('id_municipio');
+
+    const municipiosLayer = L.geoJSON(null, {
+        style: { color: '#57534e', weight: 1, opacity: 0.6, fill: true, fillOpacity: 0 },
+    }).addTo(map);
+
+    // Ray casting em coordenadas GeoJSON ([lng, lat]).
+    function pontoNoAnel([x, y], anel) {
+        let dentro = false;
+        for (let i = 0, j = anel.length - 1; i < anel.length; j = i++) {
+            const [xi, yi] = anel[i];
+            const [xj, yj] = anel[j];
+            if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) dentro = !dentro;
+        }
+        return dentro;
+    }
+
+    function pontoNoPoligono(ponto, aneis) {
+        return pontoNoAnel(ponto, aneis[0]) && !aneis.slice(1).some((buraco) => pontoNoAnel(ponto, buraco));
+    }
+
+    function feicaoContem(feature, ponto) {
+        const { type, coordinates } = feature.geometry;
+        const poligonos = type === 'Polygon' ? [coordinates] : type === 'MultiPolygon' ? coordinates : [];
+        return poligonos.some((aneis) => pontoNoPoligono(ponto, aneis));
+    }
+
+    function atualizarMunicipio(latlng) {
+        if (!municipiosLayer.getLayers().length) return; // malha ainda não carregou
+        const ponto = [latlng.lng, latlng.lat];
+        const encontrado = municipiosLayer.getLayers().find((layer) =>
+            layer.getBounds().contains(latlng) && feicaoContem(layer.feature, ponto)
+        );
+        municipioInput.value = encontrado ? encontrado.feature.properties.nome : '';
+    }
+    L.control.layers(null, { 'Limites municipais': municipiosLayer }).addTo(map);
+
+    // Limite da Bahia: o mesmo contorno que o servidor usa para validar.
+    let poligonosBahia = null;
+
+    function dentroDaBahia(latlng) {
+        if (!poligonosBahia) return true; // ainda carregando; o servidor valida de qualquer forma
+        return poligonosBahia.some((aneis) => pontoNoPoligono([latlng.lng, latlng.lat], aneis));
+    }
+
+    fetch('{% url "limite_bahia" %}').then((r) => r.json()).then((bahia) => {
+        poligonosBahia = bahia.features.flatMap(({ geometry: { type, coordinates } }) =>
+            type === 'Polygon' ? [coordinates] : type === 'MultiPolygon' ? coordinates : []
+        );
+
+        // Máscara escurecendo o que está fora do estado.
+        const mundo = [[-85, -180], [-85, 180], [85, 180], [85, -180]];
+        const furos = poligonosBahia.map((aneis) => aneis[0].map(([lng, lat]) => [lat, lng]));
+        L.polygon([mundo, ...furos], {
+            stroke: false, fillColor: '#1c1917', fillOpacity: 0.35, interactive: false,
+        }).addTo(map);
+        const limitesBahia = L.geoJSON(bahia).getBounds();
+
+        map.setMaxBounds(limitesBahia.pad(0.5));
+        if (temCoordenadas()) {
+            updateMapFromInputs();
+        } else {
+            map.fitBounds(limitesBahia, { padding: [12, 12] });
+        }
+    }).catch((error) => console.warn('Não foi possível carregar o limite da Bahia.', error));
+
+    Promise.all([
+        fetch(`https://servicodados.ibge.gov.br/api/v3/malhas/estados/${IBGE_UF}?formato=application/vnd.geo%2Bjson&intrarregiao=municipio&qualidade=minima`).then((r) => r.json()),
+        fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${IBGE_UF}/municipios`).then((r) => r.json()),
+    ]).then(([malha, municipios]) => {
+        const nomes = new Map(municipios.map((m) => [String(m.id), m.nome]));
+        malha.features.forEach((feature) => {
+            feature.properties.nome = nomes.get(feature.properties.codarea) || feature.properties.codarea;
+        });
+        municipiosLayer.addData(malha);
+        // Coordenadas já preenchidas (ex.: formulário devolvido com erro).
+        if (temCoordenadas()) {
+            atualizarMunicipio(L.latLng(readCoordinate(latInput), readCoordinate(lngInput)));
+        }
+    }).catch((error) => console.warn('Não foi possível carregar os limites municipais.', error));
+
     const marker = L.marker(defaultCenter, { draggable: true }).addTo(map);
+    let ultimaPosicaoValida = marker.getLatLng();
     window.addEventListener('load', () => map.invalidateSize());
+
+    const MENSAGEM_FORA_DA_BAHIA = 'A coordenada informada está fora da Bahia.';
+    const mapHint = document.getElementById('map-hint');
+    const mapHintText = mapHint.querySelector('span');
+    const textoDicaPadrao = mapHintText.textContent;
+    let dicaTimer;
+
+    function mostrarDica(mensagem, erro) {
+        clearTimeout(dicaTimer);
+        mapHint.classList.toggle('is-error', erro);
+        mapHintText.textContent = mensagem;
+    }
+
+    function avisarForaDaBahia({ temporario }) {
+        mostrarDica('Só é permitido marcar pontos dentro da Bahia.', true);
+        if (temporario) dicaTimer = setTimeout(() => mostrarDica(textoDicaPadrao, false), 4000);
+    }
+
+    function marcarCoordenadaInvalida(invalida) {
+        latInput.setCustomValidity(invalida ? MENSAGEM_FORA_DA_BAHIA : '');
+        [latInput, lngInput].forEach((input) => input.closest('.field').classList.toggle('has-error', invalida));
+    }
 
     function readCoordinate(input) {
         return parseFloat(input.value.replace(',', '.'));
     }
 
+    function temCoordenadas() {
+        return !Number.isNaN(readCoordinate(latInput)) && !Number.isNaN(readCoordinate(lngInput));
+    }
+
     function updateMapFromInputs() {
-        const lat = readCoordinate(latInput);
-        const lng = readCoordinate(lngInput);
-        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-            marker.setLatLng([lat, lng]);
-            map.setView([lat, lng], 12);
+        if (!temCoordenadas()) {
+            marcarCoordenadaInvalida(false);
+            return;
         }
+        const latlng = L.latLng(readCoordinate(latInput), readCoordinate(lngInput));
+        if (!dentroDaBahia(latlng)) {
+            marcarCoordenadaInvalida(true);
+            avisarForaDaBahia({ temporario: false });
+            atualizarMunicipio(latlng); // limpa o município: o ponto não cai em nenhum
+            return;
+        }
+        marcarCoordenadaInvalida(false);
+        mostrarDica(textoDicaPadrao, false);
+        marker.setLatLng(latlng);
+        ultimaPosicaoValida = latlng;
+        map.setView(latlng, 12);
+        atualizarMunicipio(latlng);
     }
 
     function updateInputsFromMap(latlng) {
         latInput.value = latlng.lat.toFixed(6);
         lngInput.value = latlng.lng.toFixed(6);
+        marcarCoordenadaInvalida(false);
+        ultimaPosicaoValida = latlng;
+        atualizarMunicipio(latlng);
     }
 
     latInput.addEventListener('input', updateMapFromInputs);
     lngInput.addEventListener('input', updateMapFromInputs);
     map.on('click', (event) => {
+        if (!dentroDaBahia(event.latlng)) {
+            avisarForaDaBahia({ temporario: true });
+            return;
+        }
         marker.setLatLng(event.latlng);
         updateInputsFromMap(event.latlng);
     });
-    marker.on('dragend', () => updateInputsFromMap(marker.getLatLng()));
+    marker.on('dragend', () => {
+        if (!dentroDaBahia(marker.getLatLng())) {
+            marker.setLatLng(ultimaPosicaoValida);
+            avisarForaDaBahia({ temporario: true });
+            return;
+        }
+        updateInputsFromMap(marker.getLatLng());
+    });
     updateMapFromInputs();
 
     const textarea = document.getElementById('id_brigadistas');

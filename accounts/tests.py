@@ -28,21 +28,70 @@ class LoginFlowTest(TestCase):
         self.assertContains(response, 'username')
         self.assertContains(response, 'password')
 
+    def _dados_cadastro(self, **extra):
+        dados = {
+            'nome_completo': 'Maria  da Silva Souza',
+            'cpf': '529.982.247-25',
+            'email': 'Maria@Teste.com',
+            'password1': 'SenhaForte123!',
+            'password2': 'SenhaForte123!',
+        }
+        dados.update(extra)
+        return dados
+
     def test_cadastro_de_usuario_cria_conta_e_redireciona_para_home(self):
-        response = self.client.post(
-            reverse('cadastro_usuario'),
-            {
-                'username': 'novo.usuario',
-                'email': 'novo@teste.com',
-                'password1': 'SenhaForte123!',
-                'password2': 'SenhaForte123!',
-            },
-            follow=True,
-        )
+        response = self.client.post(reverse('cadastro_usuario'), self._dados_cadastro(), follow=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(self.user_model.objects.filter(username='novo.usuario').exists())
         self.assertContains(response, 'Cadastro Estadual de Brigadas')
+        user = self.user_model.objects.get(username='maria@teste.com')
+        self.assertEqual(user.email, 'maria@teste.com')
+        self.assertEqual(user.perfil.nome_completo, 'Maria da Silva Souza')
+        self.assertEqual(user.perfil.cpf, '52998224725')
+        self.assertEqual((user.first_name, user.last_name), ('Maria', 'da Silva Souza'))
+
+    def test_pagina_de_cadastro_exibe_nome_completo_e_cpf(self):
+        response = self.client.get(reverse('cadastro_usuario'))
+
+        self.assertContains(response, 'name="nome_completo"')
+        self.assertContains(response, 'name="cpf"')
+        self.assertContains(response, 'name="email"')
+        self.assertNotContains(response, 'name="username"')
+
+    def test_cadastro_rejeita_cpf_invalido(self):
+        for cpf in ('123.456.789-00', '111.111.111-11', '5299822472'):
+            response = self.client.post(reverse('cadastro_usuario'), self._dados_cadastro(cpf=cpf))
+            self.assertContains(response, 'Informe um CPF válido.')
+        self.assertFalse(self.user_model.objects.filter(username='maria@teste.com').exists())
+
+    def test_cadastro_rejeita_cpf_repetido(self):
+        self.client.post(reverse('cadastro_usuario'), self._dados_cadastro())
+        self.client.logout()
+
+        response = self.client.post(reverse('cadastro_usuario'), self._dados_cadastro(email='outra@teste.com', cpf='52998224725'))
+
+        self.assertContains(response, 'Já existe uma conta com este CPF.')
+
+    def test_cadastro_rejeita_email_repetido_sem_diferenciar_maiusculas(self):
+        self.client.post(reverse('cadastro_usuario'), self._dados_cadastro())
+        self.client.logout()
+
+        response = self.client.post(reverse('cadastro_usuario'), self._dados_cadastro(email='MARIA@teste.com', cpf='111.444.777-35'))
+
+        self.assertContains(response, 'Já existe uma conta com este e-mail.')
+
+    def test_login_com_email_sem_diferenciar_maiusculas(self):
+        self.client.post(reverse('cadastro_usuario'), self._dados_cadastro())
+        self.client.logout()
+
+        response = self.client.post(reverse('login'), {'username': ' MARIA@teste.com ', 'password': 'SenhaForte123!'})
+
+        self.assertRedirects(response, reverse('home'))
+
+    def test_login_de_conta_antiga_pelo_usuario_continua_funcionando(self):
+        response = self.client.post(reverse('login'), {'username': 'brigadista', 'password': 'senha123'})
+
+        self.assertRedirects(response, reverse('home'))
 
 
 class BrigadaCadastroTest(TestCase):
@@ -61,7 +110,7 @@ class BrigadaCadastroTest(TestCase):
         self.assertContains(response, 'brigadista_cpf[]')
         self.assertContains(response, 'name="latitude"')
         self.assertContains(response, 'name="longitude"')
-        self.assertContains(response, 'openstreetmap.de')
+        self.assertContains(response, 'tile.openstreetmap.org')
         self.assertContains(response, 'Lista de brigadistas')
 
     def test_home_renderiza_campo_oculto_de_brigadistas_sem_required(self):
@@ -83,11 +132,11 @@ class BrigadaCadastroTest(TestCase):
                 'nome': 'Brigada de Incêndio Urbano',
                 'tipo': 'incendio',
                 'regiao': 'Sul',
-                'municipio': 'Criciúma',
+                'municipio': 'Salvador',
                 'lotacao': 'Base Central',
                 'cep': '88010-000',
-                'latitude': '-27.5',
-                'longitude': '-48.5',
+                'latitude': '-12.97',
+                'longitude': '-38.5',
                 'efetivo_previsto': 18,
                 'status': 'ativa',
                 'observacoes': 'Equipe de resposta rápida.',
@@ -109,6 +158,53 @@ class BrigadaCadastroTest(TestCase):
         }
         dados.update(extra)
         return dados
+
+    def test_coordenada_fora_da_bahia_nao_salva(self):
+        # Florianópolis (SC)
+        response = self.client.post(reverse('home'), self._dados_validos(latitude='-27.59', longitude='-48.55'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'A coordenada informada está fora da Bahia.')
+        self.assertFalse(Brigada.objects.exists())
+
+    def test_coordenada_no_oceano_proximo_a_salvador_nao_salva(self):
+        response = self.client.post(reverse('home'), self._dados_validos(latitude='-13.2', longitude='-38.2'))
+
+        self.assertContains(response, 'A coordenada informada está fora da Bahia.')
+        self.assertFalse(Brigada.objects.exists())
+
+    def test_latitude_sem_longitude_nao_salva(self):
+        response = self.client.post(reverse('home'), self._dados_validos(longitude=''))
+
+        self.assertContains(response, 'Informe a latitude e a longitude juntas.')
+        self.assertFalse(Brigada.objects.exists())
+
+    def test_brigada_sem_coordenadas_continua_permitida(self):
+        self.client.post(reverse('home'), self._dados_validos(latitude='', longitude=''))
+
+        self.assertTrue(Brigada.objects.filter(nome='Brigada Centro').exists())
+
+    def test_limite_da_bahia_e_servido_como_geojson(self):
+        response = self.client.get(reverse('limite_bahia'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/geo+json')
+        self.assertIn(b'"FeatureCollection"', b''.join(response.streaming_content))
+
+    def test_ponto_na_bahia(self):
+        from accounts.geo import ponto_na_bahia
+
+        self.assertTrue(ponto_na_bahia(-12.97, -38.5))  # Salvador
+        self.assertTrue(ponto_na_bahia(-9.42, -40.50))  # Juazeiro
+        self.assertTrue(ponto_na_bahia(-17.54, -39.74))  # Teixeira de Freitas
+        self.assertFalse(ponto_na_bahia(-9.39, -40.50))  # Petrolina (PE)
+        self.assertFalse(ponto_na_bahia(-15.79, -47.88))  # Brasília
+        self.assertFalse(ponto_na_bahia(-13.2, -38.2))  # Oceano
+
+    def test_salvar_brigada_grava_municipio(self):
+        self.client.post(reverse('home'), self._dados_validos(municipio='Salvador'))
+
+        self.assertEqual(Brigada.objects.get(nome='Brigada Centro').municipio, 'Salvador')
 
     def test_salvar_brigada_exibe_mensagem_de_sucesso(self):
         response = self.client.post(reverse('home'), self._dados_validos(), follow=True)
@@ -137,3 +233,38 @@ class BrigadaCadastroTest(TestCase):
 
         self.assertContains(response, '&lt;script&gt;alert(1)&lt;/script&gt;')
         self.assertNotContains(response, '<script>alert(1)</script>')
+
+
+class AdminTest(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_superuser('admin', 'admin@teste.com', 'senha123')
+        self.client.force_login(self.admin)
+
+    def test_lista_de_usuarios_exibe_nome_e_cpf(self):
+        self.client.logout()
+        self.client.post(reverse('cadastro_usuario'), {
+            'nome_completo': 'Maria da Silva', 'cpf': '529.982.247-25', 'email': 'maria@teste.com',
+            'password1': 'SenhaForte123!', 'password2': 'SenhaForte123!',
+        })
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse('admin:auth_user_changelist'), {'q': '52998224725'})
+
+        self.assertContains(response, 'Maria da Silva')
+        self.assertContains(response, '529.982.247-25')
+
+    def test_telas_do_admin_abrem(self):
+        for url in (
+            reverse('admin:index'),
+            reverse('admin:auth_user_change', args=[self.admin.pk]),
+            reverse('admin:auth_user_add'),
+            reverse('admin:accounts_brigada_changelist'),
+            reverse('admin:accounts_perfil_changelist'),
+        ):
+            self.assertEqual(self.client.get(url).status_code, 200, url)
+
+    def test_admin_exige_staff(self):
+        self.client.logout()
+        response = self.client.get(reverse('admin:index'))
+
+        self.assertEqual(response.status_code, 302)

@@ -5,7 +5,7 @@
 {% block card %}
 <div class="auth-card-head">
     <h2>Entrar</h2>
-    <p>Acesse com seu usuário e senha.</p>
+    <p>Acesse com seu e-mail e senha.</p>
 </div>
 
 <form method="post" class="auth-form">
@@ -14,12 +14,12 @@
     {% if form.errors %}
         <div class="alert alert-error" role="alert">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-            <p>Usuário ou senha inválidos.</p>
+            <p>E-mail ou senha inválidos.</p>
         </div>
     {% endif %}
 
     <div class="field">
-        <label for="id_username">Usuário</label>
+        <label for="id_username">E-mail</label>
         {{ form.username }}
     </div>
 
@@ -34,5 +34,5 @@
     <button type="submit" class="btn btn-primary btn-block">Acessar</button>
 </form>
 
-<p class="auth-footer">Ainda não tem acesso? <a href="{% url 'cadastro_usuario' %}">Criar usuário e senha</a></p>
+<p class="auth-footer">Ainda não tem acesso? <a href="{% url 'cadastro_usuario' %}">Criar conta</a></p>
 {% endblock %}
