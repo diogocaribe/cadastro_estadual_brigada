@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Estadual de Brigadas</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        :root {
+            --bg-1: #0f172a;
+            --bg-2: #1d4ed8;
+            --card: rgba(255,255,255,0.96);
+            --panel: #f8fafc;
+            --ink: #0f172a;
+            --muted: #475569;
+            --line: #cbd5e1;
+            --accent: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --shadow: rgba(15, 23, 42, 0.28);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            color: var(--ink);
+            font-family: Arial, sans-serif;
+            padding: 32px 20px;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 18px;
+            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.2);
+            padding: 20px 24px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: clamp(22px, 2vw, 32px);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            text-align: left;
+            flex: 1;
+            color: white;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .user-icon {
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            color: white;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            color: #0f172a;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.2);
+        }
+
+        .form-shell {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(6px);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 22px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.28);
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            padding: 18px;
+            border-radius: 14px;
+        }
+
+        .field-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .two-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 10px 12px;
+            font-size: 1rem;
+            color: var(--ink);
+            border-radius: 10px;
+        }
+
+        .field textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .map-section {
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #map {
+            width: 100%;
+            height: 290px;
+            border: 2px solid var(--line);
+            border-radius: 8px;
+            background: #dfe9d7;
+        }
+
+        .coords-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        .table-card {
+            margin-top: 10px;
+        }
+
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .table-toolbar h2 {
+            margin: 0;
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .add-row-btn,
+        .save-btn {
+            border: none;
+            background: var(--accent);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid var(--line);
+            background: #fff;
+        }
+
+        th, td {
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1efe9;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        td:last-child {
+            text-align: center;
+            width: 110px;
+        }
+
+        td input,
+        td textarea {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0;
+            font: inherit;
+            color: var(--ink);
+            resize: vertical;
+        }
+
+        .remove-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            border: 1px solid var(--line);
+            background: #f3d9d9;
+            color: var(--ink);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .hidden-textarea {
+            display: none;
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert p {
+            margin: 4px 0;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #14532d;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #7f1d1d;
+        }
+
+        .map-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 860px) {
+            .two-columns,
+            .two-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <h1 class="title">Cadastro Estadual de Brigadas</h1>
+            <div class="header-actions">
+                <div class="user-badge">
+                    <span class="user-icon">✓</span>
+                    <span>{{ user.get_username }}</span>
+                </div>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Sair</button>
+                </form>
+            </div>
+        </header>
+
+        <form method="post" id="brigada-form">
+            {% csrf_token %}
+
+            <div class="form-shell">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}" role="status">{{ message }}</div>
+                {% endfor %}
+
+                {% if form.errors %}
+                    <div class="alert alert-error" role="alert">
+                        <p><strong>Não foi possível salvar a brigada. Corrija os itens abaixo:</strong></p>
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ field.label }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="two-columns">
+                    <div class="panel">
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="id_nome">Nome</label>
+                                {{ form.nome }}
+                            </div>
+
+                            <div class="field">
+                                <label for="id_lotacao">Endereço</label>
+                                {{ form.lotacao }}
+                            </div>
+
+                            <div class="field">
+                                <label for="id_cep">CEP</label>
+                                {{ form.cep }}
+                            </div>
+
+                            <div class="two-fields">
+                                <div class="field">
+                                    <label for="id_latitude">Latitude</label>
+                                    {{ form.latitude }}
+                                </div>
+                                <div class="field">
+                                    <label for="id_longitude">Longitude</label>
+                                    {{ form.longitude }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel map-section">
+                        <div class="coords-label">Coordenada da brigada</div>
+                        <div id="map" aria-label="Mapa com a localização da brigada"></div>
+                        <div class="map-hint">Clique no mapa ou arraste o marcador para definir a coordenada.</div>
+                    </div>
+                </div>
+
+                <div class="panel table-card">
+                    <div class="table-toolbar">
+                        <h2>Lista de brigadistas</h2>
+                        <button type="button" class="add-row-btn" id="add-row">Adicionar</button>
+                    </div>
+
+                    <table id="brigadistas-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>CPF</th>
+                                <th>Telefone</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    {{ form.brigadistas }}
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="save-btn">Salvar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        const latInput = document.getElementById('id_latitude');
+        const lngInput = document.getElementById('id_longitude');
+        const defaultCenter = [-12.9, -41.7];
+        const map = L.map('map', {
+            zoomControl: true,
+            scrollWheelZoom: true,
+        }).setView(defaultCenter, 7);
+
+        const baseLayer = L.tileLayer('https://a.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+        });
+        baseLayer.addTo(map);
+        L.control.scale({ metric: true, imperial: false }).addTo(map);
+
+        const marker = L.marker(defaultCenter, { draggable: true }).addTo(map);
+        window.addEventListener('load', () => map.invalidateSize());
+
+        function readCoordinate(input) {
+            return parseFloat(input.value.replace(',', '.'));
+        }
+
+        function updateMapFromInputs() {
+            const lat = readCoordinate(latInput);
+            const lng = readCoordinate(lngInput);
+            if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+                marker.setLatLng([lat, lng]);
+                map.setView([lat, lng], 12);
+            }
+        }
+
+        function updateInputsFromMap(latlng) {
+            latInput.value = latlng.lat.toFixed(6);
+            lngInput.value = latlng.lng.toFixed(6);
+        }
+
+        latInput.addEventListener('input', updateMapFromInputs);
+        lngInput.addEventListener('input', updateMapFromInputs);
+        map.on('click', (event) => {
+            marker.setLatLng(event.latlng);
+            updateInputsFromMap(event.latlng);
+        });
+        marker.on('dragend', () => updateInputsFromMap(marker.getLatLng()));
+        updateMapFromInputs();
+
+        const textarea = document.getElementById('id_brigadistas');
+        const tableBody = document.querySelector('#brigadistas-table tbody');
+        const columns = [
+            { name: 'brigadista_nome[]', placeholder: 'Nome' },
+            { name: 'brigadista_email[]', placeholder: 'E-mail', type: 'email' },
+            { name: 'brigadista_cpf[]', placeholder: 'CPF' },
+            { name: 'brigadista_contato[]', placeholder: 'Telefone', type: 'tel' },
+        ];
+
+        function createRow(values = []) {
+            const row = document.createElement('tr');
+            columns.forEach((column, index) => {
+                const cell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = column.type || 'text';
+                input.name = column.name;
+                input.placeholder = column.placeholder;
+                input.value = values[index] || '';
+                cell.appendChild(input);
+                row.appendChild(cell);
+            });
+            const actionCell = document.createElement('td');
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'remove-btn';
+            removeButton.textContent = 'Remover';
+            actionCell.appendChild(removeButton);
+            row.appendChild(actionCell);
+            tableBody.appendChild(row);
+        }
+
+        function serializeTable() {
+            const rows = [];
+            tableBody.querySelectorAll('tr').forEach((row) => {
+                const values = Array.from(row.querySelectorAll('input')).map((input) => input.value.replace(/\|/g, '/').trim());
+                if (values.some(Boolean)) rows.push(values.join(' | '));
+            });
+            textarea.value = rows.join('\n');
+        }
+
+        tableBody.addEventListener('click', (event) => {
+            const button = event.target.closest('.remove-btn');
+            if (!button) return;
+            button.closest('tr').remove();
+            if (!tableBody.querySelector('tr')) createRow();
+        });
+
+        document.getElementById('add-row').addEventListener('click', () => createRow());
+        document.getElementById('brigada-form').addEventListener('submit', serializeTable);
+
+        const savedLines = textarea.value.split('\n').map((line) => line.trim()).filter(Boolean);
+        if (savedLines.length > 0) {
+            savedLines.forEach((line) => createRow(line.split('|').map((part) => part.trim())));
+        } else {
+            createRow();
+        }
+    </script>
+</body>
+</html>

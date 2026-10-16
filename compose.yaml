@@ -1,0 +1,23 @@
+services:
+  web:
+    build: .
+    container_name: geodjango_web
+    working_dir: /app
+    volumes:
+      - /home/diogocaribe/workspace/cadastro_estadual_brigada:/app
+      - sqlite_data:/var/lib/sqlite
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      DJANGO_SETTINGS_MODULE: "${DJANGO_SETTINGS_MODULE:-core.settings}"
+      DEBUG: "${DEBUG:-True}"
+      DATABASE_URL: "${DATABASE_URL:-sqlite:////var/lib/sqlite/db.sqlite3}"
+    command: bash -lc "python manage.py migrate && gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3"
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

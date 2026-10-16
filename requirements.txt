@@ -1,0 +1,4 @@
+Django>=4.2,<5.0
+gdal==3.10.3
+django-geojson
+gunicorn>=22.0.0,<23.0.0
