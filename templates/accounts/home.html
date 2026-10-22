@@ -124,7 +124,8 @@
         border: 1px solid var(--line);
         border-radius: var(--radius);
     }
-    table { width: 100%; min-width: 680px; border-collapse: collapse; }
+    table { width: 100%; min-width: 940px; border-collapse: collapse; }
+    th.col-tamanho, td.col-tamanho { width: 96px; }
     th {
         padding: 10px 12px;
         background: var(--surface-muted);
@@ -333,7 +334,7 @@
                     <span class="step">3</span>
                     <div class="card-head-main">
                         <h2>Lista de brigadistas <span class="count-badge" id="brigadistas-count">0</span></h2>
-                        <p>Informe nome, e-mail, CPF e telefone de cada brigadista.</p>
+                        <p>Informe nome, e-mail, CPF, telefone, número do calçado e tamanhos da blusa e da calça de cada brigadista.</p>
                     </div>
                     <button type="button" class="btn btn-secondary btn-sm" id="add-row">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -349,12 +350,26 @@
                                     <th>E-mail</th>
                                     <th>CPF</th>
                                     <th>Telefone</th>
+                                    <th class="col-tamanho">Calçado</th>
+                                    <th class="col-tamanho">Blusa</th>
+                                    <th class="col-tamanho">Calça</th>
                                     <th aria-label="Ações"></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
+                    <datalist id="tamanhos-blusa">
+                        <option value="PP"></option><option value="P"></option><option value="M"></option>
+                        <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
+                    </datalist>
+                    <datalist id="tamanhos-calca">
+                        <option value="PP"></option><option value="P"></option><option value="M"></option>
+                        <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
+                        <option value="36"></option><option value="38"></option><option value="40"></option><option value="42"></option>
+                        <option value="44"></option><option value="46"></option><option value="48"></option><option value="50"></option>
+                        <option value="52"></option><option value="54"></option>
+                    </datalist>
                     {{ form.brigadistas }}
                 </div>
             </section>
@@ -565,8 +580,11 @@
         { name: 'brigadista_email[]', placeholder: 'nome@exemplo.com', type: 'email' },
         { name: 'brigadista_cpf[]', placeholder: '000.000.000-00' },
         { name: 'brigadista_contato[]', placeholder: '(00) 00000-0000', type: 'tel' },
+        { name: 'brigadista_calcado[]', placeholder: '40', type: 'number', min: 15, max: 50, className: 'col-tamanho' },
+        { name: 'brigadista_blusa[]', placeholder: 'M', list: 'tamanhos-blusa', className: 'col-tamanho' },
+        { name: 'brigadista_calca[]', placeholder: '42', list: 'tamanhos-calca', className: 'col-tamanho' },
     ];
-    const columnLabels = ['Nome', 'E-mail', 'CPF', 'Telefone'];
+    const columnLabels = ['Nome', 'E-mail', 'CPF', 'Telefone', 'Número do calçado', 'Tamanho da blusa', 'Tamanho da calça'];
     const removeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
 
     function updateCount() {
@@ -580,11 +598,15 @@
         const row = document.createElement('tr');
         columns.forEach((column, index) => {
             const cell = document.createElement('td');
+            if (column.className) cell.className = column.className;
             const input = document.createElement('input');
             input.type = column.type || 'text';
             input.name = column.name;
             input.className = 'input';
             input.placeholder = column.placeholder;
+            if (column.min !== undefined) input.min = column.min;
+            if (column.max !== undefined) input.max = column.max;
+            if (column.list) input.setAttribute('list', column.list);
             input.setAttribute('aria-label', columnLabels[index]);
             input.value = values[index] || '';
             cell.appendChild(input);
