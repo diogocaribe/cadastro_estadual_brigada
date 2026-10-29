@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block extra_style %}
+<style>
+    /* Barra superior */
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: saturate(180%) blur(8px);
+        border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+    .topbar .brand { font-size: 0.9375rem; min-width: 0; }
+    .topbar .brand-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .topbar-nav { display: flex; gap: 4px; margin-right: auto; }
+    .topbar-nav a {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+    .topbar-nav a:hover { background: var(--surface-muted); color: var(--ink); text-decoration: none; }
+    .topbar-nav a[aria-current="page"] { background: var(--brand-soft); color: var(--brand); }
+    .topbar-user { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .topbar-user form { margin: 0; }
+    .avatar {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .username { font-size: 0.875rem; font-weight: 600; color: var(--muted); }
+
+    /* Página */
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px 120px; }
+    .page-head { margin-bottom: 24px; }
+    .eyebrow { font-size: 0.8125rem; font-weight: 600; color: var(--brand); margin-bottom: 6px; }
+    .page-head h1 { font-size: clamp(1.5rem, 2.4vw, 1.875rem); font-weight: 700; letter-spacing: -0.02em; }
+    .page-head .lead { margin-top: 6px; color: var(--muted); max-width: 640px; }
+
+    .alerts { display: grid; gap: 10px; margin-bottom: 20px; }
+
+    /* Cartões */
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .card-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px 22px 0;
+    }
+    .card-head-main { flex: 1; min-width: 0; }
+    .card-head h2 { font-size: 1.0625rem; font-weight: 600; }
+    .card-head p { margin-top: 2px; font-size: 0.875rem; color: var(--muted); }
+    .card-body { padding: 20px 22px 22px; display: grid; gap: 16px; flex: 1; align-content: start; }
+
+    @media (max-width: 640px) {
+        .topbar-inner { padding-left: 16px; padding-right: 16px; gap: 8px; }
+        .topbar .brand-text { display: none; }
+        .container { padding: 24px 16px 110px; }
+        .username { display: none; }
+        .card-head { padding: 16px 16px 0; }
+        .card-body { padding: 16px; }
+    }
+</style>
+{% block page_style %}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="{% url 'home' %}">
+            {% include "includes/brand_mark.html" %}
+            <span class="brand-text">Cadastro Estadual de Brigadas</span>
+        </a>
+        <nav class="topbar-nav" aria-label="Navegação principal">
+            {% url 'home' as url_home %}
+            {% url 'minhas_brigadas' as url_minhas_brigadas %}
+            <a href="{{ url_home }}"{% if request.path == url_home %} aria-current="page"{% endif %}>Nova brigada</a>
+            <a href="{{ url_minhas_brigadas }}"{% if request.path == url_minhas_brigadas or brigada %} aria-current="page"{% endif %}>Minhas brigadas</a>
+        </nav>
+        <div class="topbar-user">
+            <span class="avatar" aria-hidden="true">{{ user.get_username|first }}</span>
+            <span class="username">{{ user.get_username }}</span>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+{% endblock %}

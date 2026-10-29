@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1630" height="620" viewBox="0 0 1630 620" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="52" font-size="26" font-weight="700" fill="#0f172a">Cadastro Estadual de Brigadas — Modelo Lógico</text>
+<text x="40" y="78" font-size="14" fill="#475569">SGBD: SQLite (django.db.backends.sqlite3) · tabelas de domínio da aplicação e a tabela de usuários relacionada</text>
+<rect x="43" y="114" width="410" height="352" rx="8" fill="#0f172a" opacity="0.08"/>
+<rect x="40" y="110" width="410" height="352" rx="8" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+<path d="M40,154 V118 a8,8 0 0 1 8,-8 H442 a8,8 0 0 1 8,8 V154 Z" fill="#64748b"/>
+<text x="54" y="132" font-size="16" font-weight="700" fill="#fff">auth_user</text>
+<text x="54" y="147" font-size="11" fill="#fff" opacity="0.85">django.contrib.auth (User)</text>
+<text x="50" y="173" font-size="10" font-weight="700" fill="#b45309">PK</text>
+<text x="92" y="173" font-size="13" font-weight="700" fill="#0f172a" text-decoration="underline">id</text>
+<text x="244" y="173" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">integer</text>
+<text x="440" y="173" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="41" y="182" width="408" height="28" fill="#f8fafc"/>
+<line x1="40" y1="182" x2="450" y2="182" stroke="#e2e8f0"/>
+<text x="92" y="201" font-size="13" font-weight="400" fill="#0f172a">password</text>
+<text x="244" y="201" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(128)</text>
+<text x="440" y="201" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="40" y1="210" x2="450" y2="210" stroke="#e2e8f0"/>
+<text x="92" y="229" font-size="13" font-weight="400" fill="#0f172a">last_login</text>
+<text x="244" y="229" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">datetime</text>
+<text x="440" y="229" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<rect x="41" y="238" width="408" height="28" fill="#f8fafc"/>
+<line x1="40" y1="238" x2="450" y2="238" stroke="#e2e8f0"/>
+<text x="92" y="257" font-size="13" font-weight="400" fill="#0f172a">is_superuser</text>
+<text x="244" y="257" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bool</text>
+<text x="440" y="257" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="40" y1="266" x2="450" y2="266" stroke="#e2e8f0"/>
+<text x="50" y="285" font-size="10" font-weight="700" fill="#7c3aed">UK</text>
+<text x="92" y="285" font-size="13" font-weight="400" fill="#0f172a">username</text>
+<text x="244" y="285" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(150)</text>
+<text x="440" y="285" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="41" y="294" width="408" height="28" fill="#f8fafc"/>
+<line x1="40" y1="294" x2="450" y2="294" stroke="#e2e8f0"/>
+<text x="92" y="313" font-size="13" font-weight="400" fill="#0f172a">first_name</text>
+<text x="244" y="313" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(150)</text>
+<text x="440" y="313" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="40" y1="322" x2="450" y2="322" stroke="#e2e8f0"/>
+<text x="92" y="341" font-size="13" font-weight="400" fill="#0f172a">last_name</text>
+<text x="244" y="341" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(150)</text>
+<text x="440" y="341" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="41" y="350" width="408" height="28" fill="#f8fafc"/>
+<line x1="40" y1="350" x2="450" y2="350" stroke="#e2e8f0"/>
+<text x="92" y="369" font-size="13" font-weight="400" fill="#0f172a">email</text>
+<text x="244" y="369" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(254)</text>
+<text x="440" y="369" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="40" y1="378" x2="450" y2="378" stroke="#e2e8f0"/>
+<text x="92" y="397" font-size="13" font-weight="400" fill="#0f172a">is_staff</text>
+<text x="244" y="397" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bool</text>
+<text x="440" y="397" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="41" y="406" width="408" height="28" fill="#f8fafc"/>
+<line x1="40" y1="406" x2="450" y2="406" stroke="#e2e8f0"/>
+<text x="92" y="425" font-size="13" font-weight="400" fill="#0f172a">is_active</text>
+<text x="244" y="425" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bool</text>
+<text x="440" y="425" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="40" y1="434" x2="450" y2="434" stroke="#e2e8f0"/>
+<text x="92" y="453" font-size="13" font-weight="400" fill="#0f172a">date_joined</text>
+<text x="244" y="453" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">datetime</text>
+<text x="440" y="453" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="613" y="114" width="410" height="296" rx="8" fill="#0f172a" opacity="0.08"/>
+<rect x="610" y="110" width="410" height="296" rx="8" fill="#ffffff" stroke="#b45309" stroke-width="1.5"/>
+<path d="M610,154 V118 a8,8 0 0 1 8,-8 H1012 a8,8 0 0 1 8,8 V154 Z" fill="#b45309"/>
+<text x="624" y="132" font-size="16" font-weight="700" fill="#fff">accounts_perfil</text>
+<text x="624" y="147" font-size="11" fill="#fff" opacity="0.85">accounts.Perfil</text>
+<text x="620" y="173" font-size="10" font-weight="700" fill="#b45309">PK</text>
+<text x="662" y="173" font-size="13" font-weight="700" fill="#0f172a" text-decoration="underline">id</text>
+<text x="814" y="173" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bigint</text>
+<text x="1010" y="173" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="611" y="182" width="408" height="28" fill="#f8fafc"/>
+<line x1="610" y1="182" x2="1020" y2="182" stroke="#e2e8f0"/>
+<text x="620" y="201" font-size="10" font-weight="700" fill="#2563eb">FK UK</text>
+<text x="662" y="201" font-size="13" font-weight="400" fill="#0f172a">usuario_id</text>
+<text x="814" y="201" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">integer</text>
+<text x="1010" y="201" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="610" y1="210" x2="1020" y2="210" stroke="#e2e8f0"/>
+<text x="662" y="229" font-size="13" font-weight="400" fill="#0f172a">nome_completo</text>
+<text x="814" y="229" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(200)</text>
+<text x="1010" y="229" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="611" y="238" width="408" height="28" fill="#f8fafc"/>
+<line x1="610" y1="238" x2="1020" y2="238" stroke="#e2e8f0"/>
+<text x="620" y="257" font-size="10" font-weight="700" fill="#7c3aed">UK</text>
+<text x="662" y="257" font-size="13" font-weight="400" fill="#0f172a">cpf</text>
+<text x="814" y="257" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(11)</text>
+<text x="1010" y="257" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="610" y1="266" x2="1020" y2="266" stroke="#e2e8f0"/>
+<text x="620" y="285" font-size="10" font-weight="700" fill="#2563eb">FK</text>
+<text x="662" y="285" font-size="13" font-weight="400" fill="#0f172a">brigada_id</text>
+<text x="814" y="285" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bigint</text>
+<text x="1010" y="285" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<rect x="611" y="294" width="408" height="28" fill="#f8fafc"/>
+<line x1="610" y1="294" x2="1020" y2="294" stroke="#e2e8f0"/>
+<text x="662" y="313" font-size="13" font-weight="400" fill="#0f172a">telefone</text>
+<text x="814" y="313" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(20)</text>
+<text x="1010" y="313" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="610" y1="322" x2="1020" y2="322" stroke="#e2e8f0"/>
+<text x="662" y="341" font-size="13" font-weight="400" fill="#0f172a">numero_calcado</text>
+<text x="814" y="341" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">smallint ≥ 0</text>
+<text x="1010" y="341" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<rect x="611" y="350" width="408" height="28" fill="#f8fafc"/>
+<line x1="610" y1="350" x2="1020" y2="350" stroke="#e2e8f0"/>
+<text x="662" y="369" font-size="13" font-weight="400" fill="#0f172a">tamanho_blusa</text>
+<text x="814" y="369" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(5)</text>
+<text x="1010" y="369" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="610" y1="378" x2="1020" y2="378" stroke="#e2e8f0"/>
+<text x="662" y="397" font-size="13" font-weight="400" fill="#0f172a">tamanho_calca</text>
+<text x="814" y="397" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(5)</text>
+<text x="1010" y="397" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="1183" y="114" width="410" height="296" rx="8" fill="#0f172a" opacity="0.08"/>
+<rect x="1180" y="110" width="410" height="296" rx="8" fill="#ffffff" stroke="#b91c1c" stroke-width="1.5"/>
+<path d="M1180,154 V118 a8,8 0 0 1 8,-8 H1582 a8,8 0 0 1 8,8 V154 Z" fill="#b91c1c"/>
+<text x="1194" y="132" font-size="16" font-weight="700" fill="#fff">accounts_brigada</text>
+<text x="1194" y="147" font-size="11" fill="#fff" opacity="0.85">accounts.Brigada</text>
+<text x="1190" y="173" font-size="10" font-weight="700" fill="#b45309">PK</text>
+<text x="1232" y="173" font-size="13" font-weight="700" fill="#0f172a" text-decoration="underline">id</text>
+<text x="1384" y="173" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">bigint</text>
+<text x="1580" y="173" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="1181" y="182" width="408" height="28" fill="#f8fafc"/>
+<line x1="1180" y1="182" x2="1590" y2="182" stroke="#e2e8f0"/>
+<text x="1232" y="201" font-size="13" font-weight="400" fill="#0f172a">nome</text>
+<text x="1384" y="201" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(200)</text>
+<text x="1580" y="201" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="1180" y1="210" x2="1590" y2="210" stroke="#e2e8f0"/>
+<text x="1232" y="229" font-size="13" font-weight="400" fill="#0f172a">municipio</text>
+<text x="1384" y="229" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(100)</text>
+<text x="1580" y="229" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<rect x="1181" y="238" width="408" height="28" fill="#f8fafc"/>
+<line x1="1180" y1="238" x2="1590" y2="238" stroke="#e2e8f0"/>
+<text x="1232" y="257" font-size="13" font-weight="400" fill="#0f172a">endereco</text>
+<text x="1384" y="257" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(150)</text>
+<text x="1580" y="257" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<line x1="1180" y1="266" x2="1590" y2="266" stroke="#e2e8f0"/>
+<text x="1232" y="285" font-size="13" font-weight="400" fill="#0f172a">cep</text>
+<text x="1384" y="285" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">varchar(9)</text>
+<text x="1580" y="285" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<rect x="1181" y="294" width="408" height="28" fill="#f8fafc"/>
+<line x1="1180" y1="294" x2="1590" y2="294" stroke="#e2e8f0"/>
+<text x="1232" y="313" font-size="13" font-weight="400" fill="#0f172a">latitude</text>
+<text x="1384" y="313" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">real</text>
+<text x="1580" y="313" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<line x1="1180" y1="322" x2="1590" y2="322" stroke="#e2e8f0"/>
+<text x="1232" y="341" font-size="13" font-weight="400" fill="#0f172a">longitude</text>
+<text x="1384" y="341" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">real</text>
+<text x="1580" y="341" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<rect x="1181" y="350" width="408" height="28" fill="#f8fafc"/>
+<line x1="1180" y1="350" x2="1590" y2="350" stroke="#e2e8f0"/>
+<text x="1190" y="369" font-size="10" font-weight="700" fill="#2563eb">FK</text>
+<text x="1232" y="369" font-size="13" font-weight="400" fill="#0f172a">criado_por_id</text>
+<text x="1384" y="369" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">integer</text>
+<text x="1580" y="369" font-size="11" text-anchor="end" fill="#94a3b8">NULL</text>
+<line x1="1180" y1="378" x2="1590" y2="378" stroke="#e2e8f0"/>
+<text x="1232" y="397" font-size="13" font-weight="400" fill="#0f172a">created_at</text>
+<text x="1384" y="397" font-size="12" fill="#334155" font-family="Consolas, Menlo, monospace">datetime</text>
+<text x="1580" y="397" font-size="11" text-anchor="end" fill="#0f172a">NN</text>
+<path d="M450,168.0 H530.0 V196.0 H610" fill="none" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="460" y1="160.0" x2="460" y2="176.0" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="466" y1="160.0" x2="466" y2="176.0" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="600" y1="188.0" x2="600" y2="204.0" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="594" y1="188.0" x2="594" y2="204.0" stroke="#2563eb" stroke-width="1.8"/>
+<text x="530.0" y="158.0" font-size="12" font-weight="700" fill="#2563eb" text-anchor="middle">1 : 1</text>
+<text x="530.0" y="218.0" font-size="11" fill="#475569" text-anchor="middle">ON DELETE</text>
+<text x="530.0" y="232.0" font-size="11" fill="#475569" text-anchor="middle">CASCADE</text>
+<path d="M1020,280.0 H1100.0 V168.0 H1180" fill="none" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="1020" y1="271.0" x2="1034" y2="280.0" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="1020" y1="289.0" x2="1034" y2="280.0" stroke="#b91c1c" stroke-width="1.8"/>
+<circle cx="1042" cy="280.0" r="5" fill="#fff" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="1170" y1="160.0" x2="1170" y2="176.0" stroke="#b91c1c" stroke-width="1.8"/>
+<circle cx="1160" cy="168.0" r="5" fill="#fff" stroke="#b91c1c" stroke-width="1.8"/>
+<text x="1100.0" y="158.0" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">N : 1</text>
+<text x="1100.0" y="302.0" font-size="11" fill="#475569" text-anchor="middle">ON DELETE</text>
+<text x="1100.0" y="316.0" font-size="11" fill="#475569" text-anchor="middle">SET NULL</text>
+<path d="M450,440.0 H1130.0 V364.0 H1180" fill="none" stroke="#7c3aed" stroke-width="1.8"/>
+<line x1="460" y1="432.0" x2="460" y2="448.0" stroke="#7c3aed" stroke-width="1.8"/>
+<circle cx="472" cy="440.0" r="5" fill="#fff" stroke="#7c3aed" stroke-width="1.8"/>
+<line x1="1180" y1="355.0" x2="1166" y2="364.0" stroke="#7c3aed" stroke-width="1.8"/>
+<line x1="1180" y1="373.0" x2="1166" y2="364.0" stroke="#7c3aed" stroke-width="1.8"/>
+<circle cx="1158" cy="364.0" r="5" fill="#fff" stroke="#7c3aed" stroke-width="1.8"/>
+<text x="815.0" y="432.0" font-size="12" font-weight="700" fill="#7c3aed" text-anchor="middle">1 : N · criado_por</text>
+<text x="815.0" y="458.0" font-size="11" fill="#475569" text-anchor="middle">ON DELETE SET NULL</text>
+<rect x="1180" y="414" width="410" height="56" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+<text x="1192" y="436" font-size="12" font-weight="700" fill="#7f1d1d">Observações</text>
+<text x="1192" y="456" font-size="12" font-weight="400" fill="#7f1d1d">Ordenação padrão (Meta.ordering): created_at DESC</text>
+<text x="40" y="500" font-size="13" font-weight="700" fill="#0f172a">Legenda</text>
+<text x="40" y="524" font-size="11" font-weight="700" fill="#b45309">PK</text>
+<text x="84" y="524" font-size="12" fill="#334155">chave primária</text>
+<text x="40" y="546" font-size="11" font-weight="700" fill="#2563eb">FK</text>
+<text x="84" y="546" font-size="12" fill="#334155">chave estrangeira</text>
+<text x="40" y="568" font-size="11" font-weight="700" fill="#7c3aed">UK</text>
+<text x="84" y="568" font-size="12" fill="#334155">restrição UNIQUE</text>
+<text x="40" y="590" font-size="11" font-weight="700" fill="#0f172a">NN</text>
+<text x="84" y="590" font-size="12" fill="#334155">NOT NULL</text>
+<text x="40" y="612" font-size="11" font-weight="700" fill="#94a3b8">NULL</text>
+<text x="84" y="612" font-size="12" fill="#334155">aceita nulo</text>
+<line x1="260" y1="520" x2="300" y2="520" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="268" y1="512" x2="268" y2="528" stroke="#2563eb" stroke-width="1.8"/>
+<line x1="274" y1="512" x2="274" y2="528" stroke="#2563eb" stroke-width="1.8"/>
+<text x="310" y="524" font-size="12" fill="#334155">exatamente um</text>
+<line x1="260" y1="550" x2="300" y2="550" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="268" y1="542" x2="268" y2="558" stroke="#b91c1c" stroke-width="1.8"/>
+<circle cx="280" cy="550" r="5" fill="#fff" stroke="#b91c1c" stroke-width="1.8"/>
+<text x="310" y="554" font-size="12" fill="#334155">zero ou um</text>
+<line x1="260" y1="576" x2="300" y2="576" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="260" y1="567" x2="274" y2="576" stroke="#b91c1c" stroke-width="1.8"/>
+<line x1="260" y1="585" x2="274" y2="576" stroke="#b91c1c" stroke-width="1.8"/>
+<circle cx="282" cy="576" r="5" fill="#fff" stroke="#b91c1c" stroke-width="1.8"/>
+<text x="310" y="580" font-size="12" fill="#334155">zero ou muitos (notação pé-de-galinha)</text>
+<text x="560" y="524" font-size="12" fill="#475569">Brigadistas são usuários do sistema: cada perfil pertence a no máximo uma brigada.</text>
+<text x="560" y="544" font-size="12" fill="#475569">Cada brigada guarda o usuário que a cadastrou (criado_por), que a gerencia em Minhas brigadas.</text>
+<text x="560" y="564" font-size="12" fill="#475569">Tabelas internas do Django (sessões, permissões, admin etc.) omitidas.</text>
+</svg>

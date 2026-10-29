@@ -1,0 +1,146 @@
+{% extends "app_base.html" %}
+
+{% block title %}Minhas brigadas · Cadastro Estadual de Brigadas{% endblock %}
+
+{% block page_style %}
+<style>
+    .page-head-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 8px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--surface-muted);
+        border: 1px solid var(--line);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted);
+        vertical-align: middle;
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 720px; border-collapse: collapse; }
+    th {
+        padding: 10px 22px;
+        background: var(--surface-muted);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+    td { padding: 14px 22px; border-bottom: 1px solid var(--line); font-size: 0.9375rem; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface-muted); }
+    td.num, th.num { text-align: right; }
+    .brigada-nome { font-weight: 600; color: var(--ink); }
+    .brigada-endereco { font-size: 0.8125rem; color: var(--subtle); }
+    .muted { color: var(--subtle); }
+
+    .row-actions { display: flex; justify-content: flex-end; gap: 6px; }
+    .row-actions form { margin: 0; }
+    .btn-danger { background: var(--surface); color: var(--danger); border-color: #fecdca; box-shadow: var(--shadow-sm); }
+    .btn-danger:hover { background: var(--danger-soft); border-color: var(--danger); }
+
+    .empty { padding: 48px 22px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+    .empty p { color: var(--muted); }
+    .table-card .card-body { padding: 16px 0 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-head page-head-row">
+    <div>
+        <p class="eyebrow">Brigadas</p>
+        <h1>Minhas brigadas</h1>
+        <p class="lead">Brigadas que você cadastrou. Edite os dados e a lista de brigadistas ou exclua uma brigada.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'home' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Nova brigada
+    </a>
+</div>
+
+{% if messages %}
+    <div class="alerts">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}" role="status">
+                {% if message.tags == 'success' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+                {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                {% endif %}
+                <p>{{ message }}</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<section class="card table-card">
+    <header class="card-head">
+        <div class="card-head-main">
+            <h2>Brigadas cadastradas <span class="count-badge">{{ brigadas|length }}</span></h2>
+        </div>
+    </header>
+    <div class="card-body">
+        {% if brigadas %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Brigada</th>
+                            <th>Município</th>
+                            <th class="num">Brigadistas</th>
+                            <th>Cadastrada em</th>
+                            <th aria-label="Ações"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for brigada in brigadas %}
+                            <tr>
+                                <td>
+                                    <div class="brigada-nome">{{ brigada.nome }}</div>
+                                    <div class="brigada-endereco">{{ brigada.endereco }}</div>
+                                </td>
+                                <td>{{ brigada.municipio|default:"—" }}</td>
+                                <td class="num">{{ brigada.total_brigadistas }}</td>
+                                <td class="muted">{{ brigada.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="row-actions">
+                                        <a class="btn btn-secondary btn-sm" href="{% url 'editar_brigada' brigada.pk %}">Editar</a>
+                                        <form method="post" action="{% url 'excluir_brigada' brigada.pk %}" data-confirmar="Excluir a brigada &quot;{{ brigada.nome }}&quot;? As contas dos brigadistas também serão excluídas.">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty">
+                <p>Você ainda não cadastrou nenhuma brigada.</p>
+                <a class="btn btn-secondary" href="{% url 'home' %}">Cadastrar brigada</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('form[data-confirmar]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!confirm(form.dataset.confirmar)) event.preventDefault();
+        });
+    });
+</script>
+{% endblock %}

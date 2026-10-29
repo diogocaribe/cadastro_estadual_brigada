@@ -14,14 +14,29 @@ class PerfilInline(admin.StackedInline):
     can_delete = False
     verbose_name = 'Perfil'
     verbose_name_plural = 'Perfil'
-    fields = ('nome_completo', 'cpf')
+    fields = ('nome_completo', 'cpf', 'brigada', 'telefone', 'numero_calcado', 'tamanho_blusa', 'tamanho_calca')
 
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
-    list_display = ('nome_completo', 'cpf', 'usuario')
+    list_display = ('nome_completo', 'cpf', 'usuario', 'brigada')
+    list_filter = ('brigada',)
     search_fields = ('nome_completo', 'cpf', 'usuario__email', 'usuario__username')
-    raw_id_fields = ('usuario',)
+    raw_id_fields = ('usuario', 'brigada')
+
+
+class BrigadistaInline(admin.TabularInline):
+    model = Perfil
+    fk_name = 'brigada'
+    extra = 0
+    verbose_name = 'Brigadista'
+    verbose_name_plural = 'Brigadistas'
+    fields = ('nome_completo', 'cpf', 'usuario', 'telefone', 'numero_calcado', 'tamanho_blusa', 'tamanho_calca')
+    readonly_fields = ('nome_completo', 'cpf', 'usuario')
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 admin.site.unregister(User)
@@ -52,8 +67,9 @@ class UsuarioAdmin(UserAdmin):
 
 @admin.register(Brigada)
 class BrigadaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'municipio', 'lotacao', 'status', 'created_at')
-    list_filter = ('status', 'municipio')
-    search_fields = ('nome', 'municipio', 'lotacao', 'cep', 'brigadistas')
+    list_display = ('nome', 'municipio', 'endereco', 'created_at')
+    list_filter = ('municipio',)
+    search_fields = ('nome', 'municipio', 'endereco', 'cep', 'brigadistas__nome_completo', 'brigadistas__cpf')
     date_hierarchy = 'created_at'
     readonly_fields = ('created_at',)
+    inlines = (BrigadistaInline,)

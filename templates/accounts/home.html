@@ -1,79 +1,14 @@
-{% extends "base.html" %}
+{% extends "app_base.html" %}
 
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 {% endblock %}
 
-{% block extra_style %}
+{% block page_style %}
 <style>
-    /* Barra superior */
-    .topbar {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: saturate(180%) blur(8px);
-        border-bottom: 1px solid var(--line);
-    }
-    .topbar-inner {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 12px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-    }
-    .topbar .brand { font-size: 0.9375rem; min-width: 0; }
-    .topbar .brand-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .topbar-user { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .topbar-user form { margin: 0; }
-    .avatar {
-        width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: var(--brand-soft);
-        color: var(--brand);
-        font-size: 0.8125rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-    .username { font-size: 0.875rem; font-weight: 600; color: var(--muted); }
-
-    /* Página */
-    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px 120px; }
-    .page-head { margin-bottom: 24px; }
-    .eyebrow { font-size: 0.8125rem; font-weight: 600; color: var(--brand); margin-bottom: 6px; }
-    .page-head h1 { font-size: clamp(1.5rem, 2.4vw, 1.875rem); font-weight: 700; letter-spacing: -0.02em; }
-    .page-head .lead { margin-top: 6px; color: var(--muted); max-width: 640px; }
-
-    .alerts { display: grid; gap: 10px; margin-bottom: 20px; }
-
-    /* Cartões */
+    /* Seções */
     .sections { display: grid; gap: 20px; }
     .sections-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; }
-
-    .card {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-    .card-head {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 20px 22px 0;
-    }
-    .card-head-main { flex: 1; min-width: 0; }
-    .card-head h2 { font-size: 1.0625rem; font-weight: 600; }
-    .card-head p { margin-top: 2px; font-size: 0.875rem; color: var(--muted); }
     .step {
         width: 28px;
         height: 28px;
@@ -87,7 +22,6 @@
         font-size: 0.8125rem;
         font-weight: 700;
     }
-    .card-body { padding: 20px 22px 22px; display: grid; gap: 16px; flex: 1; align-content: start; }
     .fields-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
     /* Mapa */
@@ -102,6 +36,7 @@
     .map-hint { display: flex; align-items: center; gap: 6px; font-size: 0.8125rem; color: var(--subtle); }
     .map-hint svg { width: 16px; height: 16px; flex-shrink: 0; }
     .map-hint.is-error { color: var(--danger); font-weight: 500; }
+    #cep-status.is-error { color: var(--danger); font-weight: 500; }
     /* Evita o retângulo de foco que o navegador desenha ao clicar num polígono. */
     #map .leaflet-interactive:focus { outline: none; }
 
@@ -188,202 +123,186 @@
         gap: 16px;
     }
     .form-actions p { font-size: 0.875rem; color: var(--subtle); }
+    .form-actions-buttons { display: flex; gap: 8px; }
 
     @media (max-width: 960px) {
         .sections-top { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-        .topbar-inner, .form-actions-inner { padding-left: 16px; padding-right: 16px; }
-        .container { padding: 24px 16px 110px; }
-        .username { display: none; }
+        .form-actions-inner { padding-left: 16px; padding-right: 16px; }
         .fields-2 { grid-template-columns: 1fr; }
-        .card-head { padding: 16px 16px 0; }
-        .card-body { padding: 16px; }
         #map { height: 260px; }
         .form-actions p { display: none; }
-        .form-actions .btn { width: 100%; }
+        .form-actions-buttons { width: 100%; }
+        .form-actions .btn { flex: 1; }
     }
 </style>
 {% endblock %}
 
-{% block body %}
-<header class="topbar">
-    <div class="topbar-inner">
-        <a class="brand" href="{% url 'home' %}">
-            {% include "includes/brand_mark.html" %}
-            <span class="brand-text">Cadastro Estadual de Brigadas</span>
-        </a>
-        <div class="topbar-user">
-            <span class="avatar" aria-hidden="true">{{ user.get_username|first }}</span>
-            <span class="username">{{ user.get_username }}</span>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
-            </form>
-        </div>
-    </div>
-</header>
+{% block content %}
+<div class="page-head">
+    <p class="eyebrow">{% if brigada %}<a href="{% url 'minhas_brigadas' %}">Minhas brigadas</a>{% else %}Brigadas{% endif %}</p>
+    <h1>{% if brigada %}Editar brigada{% else %}Nova brigada{% endif %}</h1>
+    <p class="lead">{% if brigada %}Altere os dados da brigada e a lista de brigadistas. Quem for retirado da lista terá a conta excluída.{% else %}Preencha os dados de identificação, marque a localização no mapa e informe os brigadistas.{% endif %}</p>
+</div>
 
-<main class="container">
-    <div class="page-head">
-        <p class="eyebrow">Brigadas</p>
-        <h1>Nova brigada</h1>
-        <p class="lead">Preencha os dados de identificação, marque a localização no mapa e informe os brigadistas.</p>
-    </div>
-
-    {% if messages or form.errors %}
-        <div class="alerts">
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}" role="status">
-                    {% if message.tags == 'success' %}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
-                    {% else %}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-                    {% endif %}
-                    <p>{{ message }}</p>
-                </div>
-            {% endfor %}
-
-            {% if form.errors %}
-                <div class="alert alert-error" role="alert">
+{% if messages or form.errors %}
+    <div class="alerts">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}" role="status">
+                {% if message.tags == 'success' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+                {% else %}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-                    <div>
-                        <p><strong>Não foi possível salvar a brigada. Corrija os itens abaixo:</strong></p>
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
+                {% endif %}
+                <p>{{ message }}</p>
+            </div>
+        {% endfor %}
+
+        {% if form.errors %}
+            <div class="alert alert-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                <div>
+                    <p><strong>Não foi possível salvar a brigada. Corrija os itens abaixo:</strong></p>
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ field.label }}: {{ error }}</p>
                         {% endfor %}
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <p>{{ field.label }}: {{ error }}</p>
-                            {% endfor %}
-                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+<form method="post" id="brigada-form">
+    {% csrf_token %}
+
+    <div class="sections">
+        <div class="sections-top">
+            <section class="card">
+                <header class="card-head">
+                    <span class="step">1</span>
+                    <div class="card-head-main">
+                        <h2>Identificação</h2>
+                        <p>Nome, endereço e município da brigada.</p>
+                    </div>
+                </header>
+                <div class="card-body">
+                    <div class="field{% if form.nome.errors %} has-error{% endif %}">
+                        <label for="id_nome">Nome</label>
+                        {{ form.nome }}
+                    </div>
+
+                    <div class="field{% if form.endereco.errors %} has-error{% endif %}">
+                        <label for="id_endereco">Endereço</label>
+                        {{ form.endereco }}
+                    </div>
+
+                    <div class="fields-2">
+                        <div class="field{% if form.municipio.errors %} has-error{% endif %}">
+                            <label for="id_municipio">Município</label>
+                            {{ form.municipio }}
+                        </div>
+
+                        <div class="field{% if form.cep.errors %} has-error{% endif %}">
+                            <label for="id_cep">CEP <span class="optional">(opcional)</span></label>
+                            {{ form.cep }}
+                            <p class="field-help" id="cep-status" aria-live="polite">Preenche o endereço automaticamente.</p>
+                        </div>
                     </div>
                 </div>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <form method="post" id="brigada-form">
-        {% csrf_token %}
-
-        <div class="sections">
-            <div class="sections-top">
-                <section class="card">
-                    <header class="card-head">
-                        <span class="step">1</span>
-                        <div class="card-head-main">
-                            <h2>Identificação</h2>
-                            <p>Nome, endereço e município da brigada.</p>
-                        </div>
-                    </header>
-                    <div class="card-body">
-                        <div class="field{% if form.nome.errors %} has-error{% endif %}">
-                            <label for="id_nome">Nome</label>
-                            {{ form.nome }}
-                        </div>
-
-                        <div class="field{% if form.lotacao.errors %} has-error{% endif %}">
-                            <label for="id_lotacao">Endereço</label>
-                            {{ form.lotacao }}
-                        </div>
-
-                        <div class="fields-2">
-                            <div class="field{% if form.municipio.errors %} has-error{% endif %}">
-                                <label for="id_municipio">Município</label>
-                                {{ form.municipio }}
-                            </div>
-
-                            <div class="field{% if form.cep.errors %} has-error{% endif %}">
-                                <label for="id_cep">CEP <span class="optional">(opcional)</span></label>
-                                {{ form.cep }}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <header class="card-head">
-                        <span class="step">2</span>
-                        <div class="card-head-main">
-                            <h2>Localização</h2>
-                            <p>Coordenada da brigada</p>
-                        </div>
-                    </header>
-                    <div class="card-body">
-                        <div id="map" aria-label="Mapa com a localização da brigada"></div>
-                        <p class="map-hint" id="map-hint" aria-live="polite">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>
-                            <span>Clique no mapa ou arraste o marcador para definir a coordenada dentro da Bahia.</span>
-                        </p>
-                        <div class="fields-2">
-                            <div class="field{% if form.latitude.errors or form.non_field_errors %} has-error{% endif %}">
-                                <label for="id_latitude">Latitude</label>
-                                {{ form.latitude }}
-                            </div>
-                            <div class="field{% if form.longitude.errors or form.non_field_errors %} has-error{% endif %}">
-                                <label for="id_longitude">Longitude</label>
-                                {{ form.longitude }}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+            </section>
 
             <section class="card">
                 <header class="card-head">
-                    <span class="step">3</span>
+                    <span class="step">2</span>
                     <div class="card-head-main">
-                        <h2>Lista de brigadistas <span class="count-badge" id="brigadistas-count">0</span></h2>
-                        <p>Informe nome, e-mail, CPF, telefone, número do calçado e tamanhos da blusa e da calça de cada brigadista.</p>
+                        <h2>Localização</h2>
+                        <p>Coordenada da brigada</p>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" id="add-row">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                        Adicionar
-                    </button>
                 </header>
                 <div class="card-body">
-                    <div class="table-wrap">
-                        <table id="brigadistas-table">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>E-mail</th>
-                                    <th>CPF</th>
-                                    <th>Telefone</th>
-                                    <th class="col-tamanho">Calçado</th>
-                                    <th class="col-tamanho">Blusa</th>
-                                    <th class="col-tamanho">Calça</th>
-                                    <th aria-label="Ações"></th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <div id="map" aria-label="Mapa com a localização da brigada"></div>
+                    <p class="map-hint" id="map-hint" aria-live="polite">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>
+                        <span>Clique no mapa ou arraste o marcador para definir a coordenada dentro da Bahia.</span>
+                    </p>
+                    <div class="fields-2">
+                        <div class="field{% if form.latitude.errors or form.non_field_errors %} has-error{% endif %}">
+                            <label for="id_latitude">Latitude</label>
+                            {{ form.latitude }}
+                        </div>
+                        <div class="field{% if form.longitude.errors or form.non_field_errors %} has-error{% endif %}">
+                            <label for="id_longitude">Longitude</label>
+                            {{ form.longitude }}
+                        </div>
                     </div>
-                    <datalist id="tamanhos-blusa">
-                        <option value="PP"></option><option value="P"></option><option value="M"></option>
-                        <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
-                    </datalist>
-                    <datalist id="tamanhos-calca">
-                        <option value="PP"></option><option value="P"></option><option value="M"></option>
-                        <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
-                        <option value="36"></option><option value="38"></option><option value="40"></option><option value="42"></option>
-                        <option value="44"></option><option value="46"></option><option value="48"></option><option value="50"></option>
-                        <option value="52"></option><option value="54"></option>
-                    </datalist>
-                    {{ form.brigadistas }}
                 </div>
             </section>
         </div>
 
-        <div class="form-actions">
-            <div class="form-actions-inner">
-                <p>Revise os dados antes de salvar.</p>
-                <button type="submit" class="btn btn-primary">Salvar brigada</button>
+        <section class="card">
+            <header class="card-head">
+                <span class="step">3</span>
+                <div class="card-head-main">
+                    <h2>Lista de brigadistas <span class="count-badge" id="brigadistas-count">0</span></h2>
+                    <p>Informe nome, e-mail, CPF, telefone, número do calçado e tamanhos da blusa e da calça de cada brigadista.</p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="add-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    Adicionar
+                </button>
+            </header>
+            <div class="card-body">
+                <div class="table-wrap">
+                    <table id="brigadistas-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>CPF</th>
+                                <th>Telefone</th>
+                                <th class="col-tamanho">Calçado</th>
+                                <th class="col-tamanho">Blusa</th>
+                                <th class="col-tamanho">Calça</th>
+                                <th aria-label="Ações"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <datalist id="tamanhos-blusa">
+                    <option value="PP"></option><option value="P"></option><option value="M"></option>
+                    <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
+                </datalist>
+                <datalist id="tamanhos-calca">
+                    <option value="PP"></option><option value="P"></option><option value="M"></option>
+                    <option value="G"></option><option value="GG"></option><option value="XG"></option><option value="XGG"></option>
+                    <option value="36"></option><option value="38"></option><option value="40"></option><option value="42"></option>
+                    <option value="44"></option><option value="46"></option><option value="48"></option><option value="50"></option>
+                    <option value="52"></option><option value="54"></option>
+                </datalist>
+                {{ form.brigadistas }}
+            </div>
+        </section>
+    </div>
+
+    <div class="form-actions">
+        <div class="form-actions-inner">
+            <p>Revise os dados antes de salvar.</p>
+            <div class="form-actions-buttons">
+                {% if brigada %}<a class="btn btn-secondary" href="{% url 'minhas_brigadas' %}">Cancelar</a>{% endif %}
+                <button type="submit" class="btn btn-primary">{% if brigada %}Salvar alterações{% else %}Salvar brigada{% endif %}</button>
             </div>
         </div>
-    </form>
-</main>
+    </div>
+</form>
 {% endblock %}
+
 
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -571,6 +490,67 @@
         updateInputsFromMap(marker.getLatLng());
     });
     updateMapFromInputs();
+
+    // Autopreenchimento do endereço pelo CEP (ViaCEP). Só preenche o campo se
+    // estiver vazio ou se o próprio CEP o preencheu, para não apagar o que o usuário digitou.
+    // O município não é tocado: ele vem do ponto marcado no mapa.
+    const cepInput = document.getElementById('id_cep');
+    const cepStatus = document.getElementById('cep-status');
+    const enderecoInput = document.getElementById('id_endereco');
+    const textoCepPadrao = cepStatus.textContent;
+    let ultimoCepConsultado = '';
+
+    function mostrarStatusCep(mensagem, erro = false) {
+        cepStatus.textContent = mensagem;
+        cepStatus.classList.toggle('is-error', erro);
+    }
+
+    function preencherEndereco(valor) {
+        if (!valor || (enderecoInput.value.trim() && !enderecoInput.dataset.preenchidoPeloCep)) return;
+        enderecoInput.value = valor;
+        enderecoInput.dataset.preenchidoPeloCep = '1';
+    }
+
+    enderecoInput.addEventListener('input', () => delete enderecoInput.dataset.preenchidoPeloCep);
+
+    async function consultarCep() {
+        const cep = cepInput.value.replace(/\D/g, '');
+        if (cep.length !== 8) {
+            ultimoCepConsultado = '';
+            mostrarStatusCep(cep ? 'O CEP deve ter 8 dígitos.' : textoCepPadrao, cep.length > 0 && document.activeElement !== cepInput);
+            return;
+        }
+        if (cep === ultimoCepConsultado) return;
+        ultimoCepConsultado = cep;
+        mostrarStatusCep('Buscando endereço…');
+        try {
+            const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!resposta.ok) throw new Error(resposta.status);
+            const dados = await resposta.json();
+            if (cep !== cepInput.value.replace(/\D/g, '')) return; // o CEP mudou durante a consulta
+            if (dados.erro) {
+                mostrarStatusCep('CEP não encontrado.', true);
+                return;
+            }
+            const endereco = [dados.logradouro, dados.bairro].filter(Boolean).join(', ');
+            preencherEndereco(endereco);
+            if (dados.uf !== 'BA') {
+                mostrarStatusCep(`Este CEP é de ${dados.localidade}/${dados.uf}, fora da Bahia.`, true);
+            } else {
+                mostrarStatusCep(`${dados.localidade}/${dados.uf}${endereco ? '' : ' (CEP geral, informe o logradouro)'}`);
+            }
+        } catch (erro) {
+            ultimoCepConsultado = '';
+            mostrarStatusCep('Não foi possível consultar o CEP agora. Preencha o endereço manualmente.', true);
+        }
+    }
+
+    cepInput.addEventListener('input', () => {
+        const digitos = cepInput.value.replace(/\D/g, '').slice(0, 8);
+        cepInput.value = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+        consultarCep();
+    });
+    cepInput.addEventListener('blur', consultarCep);
 
     const textarea = document.getElementById('id_brigadistas');
     const tableBody = document.querySelector('#brigadistas-table tbody');
